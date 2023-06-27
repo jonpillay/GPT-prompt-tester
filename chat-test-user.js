@@ -1,7 +1,8 @@
 import { config } from "dotenv";
 import prompt_gen from "./prompt_gen.js"
-import SD_prompt_gen from "./DS_prompt_gen.js";
+import DSDescriptionGen from "./DS_description_gen.js";
 import DSGenerateImage from "./DS_Client.js";
+import DSPromptGen from "./DS_prompt_gen.js";
 config()
 
 import { Configuration, OpenAIApi } from "openai"
@@ -47,11 +48,11 @@ const sd_starter_prompts = [
   },
   {
     role: "system",
-    content: "Be short and concise in your description, return less than 15 words."
+    content: "Be short and concise in your description, only return 15-20 words."
   },
 ]
 
-let example_inputs_dict = {character: "Rapunzel", genre: "western"}
+let example_inputs_dict = {character: 'Batman', genre: 'Western', style: 'anime'}
 
 let message_history = prompt_gen(starter_prompts, example_inputs_dict)
 console.log(message_history)
@@ -65,10 +66,18 @@ chatUI.on('line', async input => {
   })
   message_history.push(res.data.choices[0].message)
   console.log(res.data.choices[0].message.content)
-  const sd_res = await SD_prompt_gen(sd_starter_prompts, res.data.choices[0].message.content, example_inputs_dict["genre"], example_inputs_dict["character"])
+  const DS_description = await DSDescriptionGen(sd_starter_prompts, res.data.choices[0].message.content, example_inputs_dict["genre"], example_inputs_dict["character"])
   console.log(" ")
   console.log("START OF DS DESCRIPTION")
   console.log(" ")
-  console.log(sd_res)
+  const DS_prompts = DSPromptGen(example_inputs_dict)
+  console.log(DS_prompts)
+  const DS_prompts_complete = DS_description.concat(DS_prompts["prompts"])
+  console.log(DS_prompts_complete)
+  const DS_res = await DSGenerateImage(DS_prompts_complete, example_inputs_dict["style"])
+  // console.log(DS_description)
+
+  console.log(DS_res)
+
   chatUI.prompt()
 })

@@ -7,7 +7,7 @@ const apiKey = process.env.DS_KEY;
 
 if (!apiKey) throw new Error('Missing Stability API key.');
 
-async function DSGenerateImage(prompts) {
+async function DSGenerateImage(prompts, style) {
   const response = await fetch(`${apiHost}/v1/generation/${engineId}/text-to-image`, {
     method: 'POST',
     headers: {
@@ -28,7 +28,7 @@ async function DSGenerateImage(prompts) {
       width: 512,
       samples: 1,
       steps: 50,
-      style_preset: 'enhance',
+      style_preset: style,
     }),
   });
 
